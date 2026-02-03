@@ -22,6 +22,7 @@ export default function Home() {
   const [sheetId, setSheetId] = useState('');
   const [dataSource, setDataSource] = useState<'google' | 'file'>('file');
   const [spreadsheetFile, setSpreadsheetFile] = useState<File | null>(null);
+  const [showHowToUse, setShowHowToUse] = useState(false);
 
   // Extract fields from uploaded PDF
   const handlePdfUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -155,8 +156,90 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 to-blue-50 p-8">
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-4xl font-bold text-gray-800 mb-2">PDF Form Filler</h1>
-        <p className="text-gray-600 mb-8">Fountain Provider Onboarding Tool</p>
+        <div className="flex justify-between items-start mb-6">
+          <div>
+            <h1 className="text-4xl font-bold text-gray-800 mb-2">PDF Form Filler</h1>
+            <p className="text-gray-600">Fountain Provider Onboarding Tool</p>
+          </div>
+          <button
+            onClick={() => setShowHowToUse(!showHowToUse)}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition shadow-md"
+          >
+            {showHowToUse ? '✕ Hide' : '❓ How to Use'}
+          </button>
+        </div>
+
+        {/* How to Use Section */}
+        {showHowToUse && (
+          <div className="mb-8 bg-white rounded-lg shadow-lg p-6 border-2 border-blue-300">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">📖 How to Use This Tool</h2>
+            
+            <div className="space-y-4">
+              <div className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500">
+                <h3 className="font-semibold text-lg text-blue-800 mb-2">Step 1: Upload Your PDF Form</h3>
+                <p className="text-gray-700 text-sm">
+                  Click "Choose File" and select your PDF form (like "Belmar Form"). The app will automatically detect all fillable fields.
+                </p>
+              </div>
+
+              <div className="bg-green-50 p-4 rounded-lg border-l-4 border-green-500">
+                <h3 className="font-semibold text-lg text-green-800 mb-2">Step 2: Upload Your Spreadsheet</h3>
+                <p className="text-gray-700 text-sm mb-2">
+                  Click "📄 Upload File" and select your CSV or Excel file with provider data. Make sure the first row contains column headers (Name, Address, Phone, etc.).
+                </p>
+                <p className="text-xs text-gray-600 italic">
+                  💡 Tip: You can also use Google Sheets by clicking the "🔗 Google Sheets" button.
+                </p>
+              </div>
+
+              <div className="bg-purple-50 p-4 rounded-lg border-l-4 border-purple-500">
+                <h3 className="font-semibold text-lg text-purple-800 mb-2">Step 3: Map Fields (One-Time Setup)</h3>
+                <p className="text-gray-700 text-sm">
+                  Match each PDF field to the corresponding column in your spreadsheet. For example: PDF field "Provider Name" → Spreadsheet column "Name". You only need to do this once per PDF template.
+                </p>
+              </div>
+
+              <div className="bg-orange-50 p-4 rounded-lg border-l-4 border-orange-500">
+                <h3 className="font-semibold text-lg text-orange-800 mb-2">Step 4: Select a Person 👤</h3>
+                <p className="text-gray-700 text-sm mb-2">
+                  After your spreadsheet loads, a dropdown will appear with all people from your file. <strong>Select the person</strong> you want to fill the PDF for.
+                </p>
+                <p className="text-xs text-gray-600 italic">
+                  💡 You'll see their information preview below the dropdown.
+                </p>
+              </div>
+
+              <div className="bg-pink-50 p-4 rounded-lg border-l-4 border-pink-500">
+                <h3 className="font-semibold text-lg text-pink-800 mb-2">Step 5: Fill & Download 🚀</h3>
+                <p className="text-gray-700 text-sm">
+                  Click the "🚀 Fill PDF & Download" button. The PDF will be automatically filled with the selected person's data and download to your computer!
+                </p>
+              </div>
+
+              <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-300">
+                <h4 className="font-semibold text-gray-800 mb-2">💡 Quick Tips:</h4>
+                <ul className="text-sm text-gray-700 space-y-1 list-disc list-inside">
+                  <li>You can fill multiple PDFs - just select a different person each time</li>
+                  <li>Field mapping is saved during your session (until you refresh the page)</li>
+                  <li>Only text fields are filled - checkboxes are excluded</li>
+                  <li>Empty cells in your spreadsheet will leave PDF fields blank</li>
+                </ul>
+              </div>
+
+              <div className="mt-4 p-4 bg-yellow-50 rounded-lg border border-yellow-300">
+                <h4 className="font-semibold text-yellow-800 mb-2">📋 Spreadsheet Format:</h4>
+                <p className="text-sm text-gray-700 mb-2">
+                  Your spreadsheet should have:
+                </p>
+                <ul className="text-sm text-gray-700 space-y-1 list-disc list-inside">
+                  <li><strong>First row = Column headers</strong> (Name, Email, Address, etc.)</li>
+                  <li><strong>Each row = One person/provider</strong></li>
+                  <li><strong>Supported formats:</strong> CSV (.csv) or Excel (.xlsx, .xls)</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="grid md:grid-cols-2 gap-6">
           {/* Left Column - PDF Upload */}
