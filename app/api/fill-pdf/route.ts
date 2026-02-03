@@ -49,7 +49,8 @@ export async function POST(request: NextRequest) {
     // Save the filled PDF
     const pdfBytes = await pdfDoc.save();
 
-    return new NextResponse(pdfBytes, {
+    // Convert Uint8Array to Buffer for NextResponse
+    return new NextResponse(Buffer.from(pdfBytes), {
       headers: {
         'Content-Type': 'application/pdf',
         'Content-Disposition': 'attachment; filename="filled-form.pdf"',

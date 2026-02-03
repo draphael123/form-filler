@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-// @ts-ignore - xlsx doesn't have perfect TypeScript support
-import XLSX from 'xlsx';
+// xlsx uses namespace export, not default export
+import * as XLSX from 'xlsx';
 
 export async function POST(request: NextRequest) {
   try {
