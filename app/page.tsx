@@ -267,18 +267,18 @@ export default function Home() {
   }, [selectedPerson, Object.keys(fieldMapping).length]);
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-blue-50">
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Header */}
-        <header className="mb-8 pb-6 border-b border-slate-200">
+        <header className="mb-8 pb-6 border-b border-blue-200">
           <div className="flex justify-between items-start">
             <div>
-              <h1 className="text-3xl font-semibold text-slate-900 mb-1">Provider Compliance Dashboard</h1>
-              <p className="text-slate-600 text-sm">PDF form automation tool</p>
+              <h1 className="text-3xl font-semibold text-blue-900 mb-1">Provider Compliance Dashboard</h1>
+              <p className="text-blue-700 text-sm">PDF form automation tool</p>
             </div>
             <button
               onClick={() => setShowHowToUse(!showHowToUse)}
-              className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-md hover:bg-slate-50 transition-colors"
+              className="px-4 py-2 text-sm font-medium text-blue-700 bg-white border border-blue-300 rounded-md hover:bg-blue-50 transition-colors"
             >
               {showHowToUse ? 'Hide Guide' : 'How to Use'}
             </button>
@@ -287,41 +287,41 @@ export default function Home() {
 
         {/* How to Use Section */}
         {showHowToUse && (
-          <div className="mb-8 bg-white rounded-lg shadow-sm border border-slate-200 p-6">
-            <h2 className="text-xl font-semibold text-slate-900 mb-6">How to Use</h2>
+          <div className="mb-8 bg-white rounded-lg shadow-sm border border-blue-200 p-6">
+            <h2 className="text-xl font-semibold text-blue-900 mb-6">How to Use</h2>
             
             <div className="space-y-4">
-              <div className="border-l-4 border-slate-300 pl-4">
-                <h3 className="font-medium text-slate-900 mb-1">Step 1: Upload PDF Form</h3>
-                <p className="text-slate-600 text-sm">
+              <div className="border-l-4 border-blue-500 pl-4">
+                <h3 className="font-medium text-blue-900 mb-1">Step 1: Upload PDF Form</h3>
+                <p className="text-blue-700 text-sm">
                   Select your PDF form. The application will automatically detect all fillable fields.
                 </p>
               </div>
 
-              <div className="border-l-4 border-slate-300 pl-4">
-                <h3 className="font-medium text-slate-900 mb-1">Step 2: Upload Provider Data</h3>
-                <p className="text-slate-600 text-sm">
+              <div className="border-l-4 border-blue-500 pl-4">
+                <h3 className="font-medium text-blue-900 mb-1">Step 2: Upload Provider Data</h3>
+                <p className="text-blue-700 text-sm">
                   Upload your Provider Compliance Dashboard file (CSV or Excel). Column 1 will be used as the provider identifier. Alternatively, connect to Google Sheets.
                 </p>
               </div>
 
-              <div className="border-l-4 border-slate-300 pl-4">
-                <h3 className="font-medium text-slate-900 mb-1">Step 3: Map Fields</h3>
-                <p className="text-slate-600 text-sm">
+              <div className="border-l-4 border-blue-500 pl-4">
+                <h3 className="font-medium text-blue-900 mb-1">Step 3: Map Fields</h3>
+                <p className="text-blue-700 text-sm">
                   Fields are automatically mapped when possible. Review and adjust mappings as needed. This only needs to be done once per PDF template.
                 </p>
               </div>
 
-              <div className="border-l-4 border-slate-300 pl-4">
-                <h3 className="font-medium text-slate-900 mb-1">Step 4: Select Provider</h3>
-                <p className="text-slate-600 text-sm">
+              <div className="border-l-4 border-blue-500 pl-4">
+                <h3 className="font-medium text-blue-900 mb-1">Step 4: Select Provider</h3>
+                <p className="text-blue-700 text-sm">
                   Choose a provider from the dropdown. The form preview will update automatically with their information.
                 </p>
               </div>
 
-              <div className="border-l-4 border-slate-300 pl-4">
-                <h3 className="font-medium text-slate-900 mb-1">Step 5: Download</h3>
-                <p className="text-slate-600 text-sm">
+              <div className="border-l-4 border-blue-500 pl-4">
+                <h3 className="font-medium text-blue-900 mb-1">Step 5: Download</h3>
+                <p className="text-blue-700 text-sm">
                   Review the preview, then download the filled PDF form.
                 </p>
               </div>
@@ -331,22 +331,22 @@ export default function Home() {
 
         <div className="grid md:grid-cols-2 gap-6 mb-6">
           {/* Left Column - PDF Upload */}
-          <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
-            <h2 className="text-lg font-semibold text-slate-900 mb-4">1. Upload PDF Form</h2>
+          <div className="bg-white rounded-lg shadow-sm border border-blue-200 p-6">
+            <h2 className="text-lg font-semibold text-blue-900 mb-4">1. Upload PDF Form</h2>
             
             <label className="block">
               <input
                 type="file"
                 accept=".pdf"
                 onChange={handlePdfUpload}
-                className="block w-full text-sm text-slate-600 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-slate-50 file:text-slate-700 hover:file:bg-slate-100 cursor-pointer"
+                className="block w-full text-sm text-blue-700 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer"
               />
             </label>
 
             {pdfFile && (
-              <div className="mt-4 p-3 bg-slate-50 border border-slate-200 rounded-md">
-                <p className="text-sm font-medium text-slate-900">{pdfFile.name}</p>
-                <p className="text-xs text-slate-600 mt-1">
+              <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                <p className="text-sm font-medium text-blue-900">{pdfFile.name}</p>
+                <p className="text-xs text-blue-700 mt-1">
                   {formFields.length} fillable fields detected
                 </p>
               </div>
@@ -354,11 +354,11 @@ export default function Home() {
 
             {formFields.length > 0 && (
               <div className="mt-6">
-                <h3 className="text-sm font-medium text-slate-900 mb-2">Form Fields</h3>
-                <div className="max-h-64 overflow-y-auto bg-slate-50 border border-slate-200 rounded-md p-3">
+                <h3 className="text-sm font-medium text-blue-900 mb-2">Form Fields</h3>
+                <div className="max-h-64 overflow-y-auto bg-blue-50 border border-blue-200 rounded-md p-3">
                   <div className="space-y-1">
                     {formFields.map((field, idx) => (
-                      <div key={idx} className="text-sm text-slate-700 py-1">
+                      <div key={idx} className="text-sm text-blue-800 py-1">
                         {field.name}
                       </div>
                     ))}
@@ -369,8 +369,8 @@ export default function Home() {
           </div>
 
           {/* Right Column - Data Source */}
-          <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
-            <h2 className="text-lg font-semibold text-slate-900 mb-4">2. Connect Data Source</h2>
+          <div className="bg-white rounded-lg shadow-sm border border-blue-200 p-6">
+            <h2 className="text-lg font-semibold text-blue-900 mb-4">2. Connect Data Source</h2>
             
             {/* Data Source Toggle */}
             <div className="mb-4 flex gap-2">
@@ -378,8 +378,8 @@ export default function Home() {
                 onClick={() => setDataSource('file')}
                 className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
                   dataSource === 'file'
-                    ? 'bg-slate-900 text-white'
-                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200'
                 }`}
               >
                 Upload File
@@ -388,8 +388,8 @@ export default function Home() {
                 onClick={() => setDataSource('google')}
                 className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
                   dataSource === 'google'
-                    ? 'bg-slate-900 text-white'
-                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200'
                 }`}
               >
                 Google Sheets
@@ -399,23 +399,23 @@ export default function Home() {
             {/* File Upload Option */}
             {dataSource === 'file' && (
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="block text-sm font-medium text-blue-900 mb-2">
                   Upload Provider Compliance Dashboard
                 </label>
                 <input
                   type="file"
                   accept=".csv,.xlsx,.xls"
                   onChange={handleSpreadsheetUpload}
-                  className="block w-full text-sm text-slate-600 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-slate-50 file:text-slate-700 hover:file:bg-slate-100 cursor-pointer"
+                  className="block w-full text-sm text-blue-700 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer"
                 />
-                <p className="text-xs text-slate-500 mt-2 mb-4">
+                <p className="text-xs text-blue-600 mt-2 mb-4">
                   Column 1 will be used as the provider identifier
                 </p>
                 {spreadsheetFile && (
-                  <div className="p-3 bg-slate-50 border border-slate-200 rounded-md mb-4">
-                    <p className="text-sm font-medium text-slate-900">{spreadsheetFile.name}</p>
+                  <div className="p-3 bg-blue-50 border border-blue-200 rounded-md mb-4">
+                    <p className="text-sm font-medium text-blue-900">{spreadsheetFile.name}</p>
                     {people.length > 0 && (
-                      <p className="text-xs text-slate-600 mt-1">
+                      <p className="text-xs text-blue-700 mt-1">
                         {people.length} {people.length === 1 ? 'provider' : 'providers'} loaded
                       </p>
                     )}
@@ -428,7 +428,7 @@ export default function Home() {
             {dataSource === 'google' && (
               <div>
                 <div className="mb-4">
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                  <label className="block text-sm font-medium text-blue-900 mb-2">
                     Google Sheet ID
                   </label>
                   <input
@@ -436,9 +436,9 @@ export default function Home() {
                     value={sheetId}
                     onChange={(e) => setSheetId(e.target.value)}
                     placeholder="Enter Google Sheet ID"
-                    className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
-                  <p className="text-xs text-slate-500 mt-1">
+                  <p className="text-xs text-blue-600 mt-1">
                     Found in Sheet URL: docs.google.com/spreadsheets/d/[SHEET_ID]/edit
                   </p>
                 </div>
@@ -446,7 +446,7 @@ export default function Home() {
                 <button
                   onClick={handleFetchPeople}
                   disabled={loading || !sheetId}
-                  className="w-full bg-slate-900 text-white py-2 px-4 rounded-md hover:bg-slate-800 disabled:bg-slate-300 disabled:cursor-not-allowed transition-colors text-sm font-medium"
+                  className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed transition-colors text-sm font-medium"
                 >
                   {loading ? 'Loading...' : 'Fetch Data'}
                 </button>
@@ -454,9 +454,9 @@ export default function Home() {
             )}
 
             {people.length > 0 && (
-              <div className="mt-6 p-4 bg-slate-50 border border-slate-200 rounded-md">
-                <h3 className="text-sm font-semibold text-slate-900 mb-3">{people.length} {people.length === 1 ? 'Provider' : 'Providers'} Loaded</h3>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+              <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-md">
+                <h3 className="text-sm font-semibold text-blue-900 mb-3">{people.length} {people.length === 1 ? 'Provider' : 'Providers'} Loaded</h3>
+                <label className="block text-sm font-medium text-blue-900 mb-2">
                   Select Provider
                 </label>
                 <select
@@ -469,7 +469,7 @@ export default function Home() {
                     }
                   }}
                   value={selectedPerson ? people.indexOf(selectedPerson).toString() : ''}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent bg-white"
+                  className="w-full px-3 py-2 border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
                 >
                   <option value="">Select a provider</option>
                   {people.map((person, idx) => {
@@ -484,15 +484,15 @@ export default function Home() {
                 </select>
 
                 {selectedPerson && (
-                  <div className="mt-4 p-3 bg-white border border-slate-200 rounded-md">
-                    <p className="text-xs font-medium text-slate-900 mb-2">Provider Information</p>
+                  <div className="mt-4 p-3 bg-white border border-blue-200 rounded-md">
+                    <p className="text-xs font-medium text-blue-900 mb-2">Provider Information</p>
                     <div className="max-h-48 overflow-y-auto space-y-1">
                       {Object.entries(selectedPerson)
                         .filter(([key, value]) => value && String(value).trim())
                         .slice(0, 8)
                         .map(([key, value]) => (
-                          <p key={key} className="text-xs text-slate-600">
-                            <span className="font-medium text-slate-700">{key}:</span> {String(value).substring(0, 50)}{String(value).length > 50 ? '...' : ''}
+                          <p key={key} className="text-xs text-blue-700">
+                            <span className="font-medium text-blue-900">{key}:</span> {String(value).substring(0, 50)}{String(value).length > 50 ? '...' : ''}
                           </p>
                         ))}
                     </div>
@@ -505,17 +505,17 @@ export default function Home() {
 
         {/* Field Mapping Section */}
         {formFields.length > 0 && sheetColumns.length > 0 && (
-          <div className="mb-6 bg-white rounded-lg shadow-sm border border-slate-200 p-6">
+          <div className="mb-6 bg-white rounded-lg shadow-sm border border-blue-200 p-6">
             <div className="flex justify-between items-center mb-4">
               <div>
-                <h2 className="text-lg font-semibold text-slate-900">3. Map Fields</h2>
-                <p className="text-sm text-slate-600 mt-1">
+                <h2 className="text-lg font-semibold text-blue-900">3. Map Fields</h2>
+                <p className="text-sm text-blue-700 mt-1">
                   Fields are automatically mapped. Review and adjust as needed.
                 </p>
               </div>
               <button
                 onClick={autoMapFields}
-                className="px-3 py-1.5 bg-slate-100 text-slate-700 rounded-md hover:bg-slate-200 text-sm font-medium transition-colors"
+                className="px-3 py-1.5 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 text-sm font-medium transition-colors"
               >
                 Re-map Fields
               </button>
@@ -523,14 +523,14 @@ export default function Home() {
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
               {formFields.map((field) => (
-                <div key={field.name} className="border border-slate-200 rounded-md p-3">
-                  <label className="block text-xs font-medium text-slate-700 mb-1.5">
+                <div key={field.name} className="border border-blue-200 rounded-md p-3">
+                  <label className="block text-xs font-medium text-blue-900 mb-1.5">
                     {field.name}
                   </label>
                   <select
                     value={fieldMapping[field.name] || ''}
                     onChange={(e) => updateMapping(field.name, e.target.value)}
-                    className="w-full px-2 py-1.5 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent text-sm"
+                    className="w-full px-2 py-1.5 border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                   >
                     <option value="">Skip field</option>
                     {sheetColumns.map((col) => (
@@ -547,20 +547,20 @@ export default function Home() {
 
         {/* Live Preview Section */}
         {previewUrl && selectedPerson && (
-          <div className="mb-6 bg-white rounded-lg shadow-sm border border-slate-200 p-6">
+          <div className="mb-6 bg-white rounded-lg shadow-sm border border-blue-200 p-6">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold text-slate-900">Form Preview</h2>
+              <h2 className="text-lg font-semibold text-blue-900">Form Preview</h2>
               {previewLoading && (
-                <span className="text-xs text-slate-500">Updating...</span>
+                <span className="text-xs text-blue-600">Updating...</span>
               )}
             </div>
-            <p className="text-sm text-slate-600 mb-4">
-              Preview for <span className="font-medium text-slate-900">{(() => {
+            <p className="text-sm text-blue-700 mb-4">
+              Preview for <span className="font-medium text-blue-900">{(() => {
                 const firstColumnKey = Object.keys(selectedPerson)[0];
                 return selectedPerson[firstColumnKey] || selectedPerson.name || selectedPerson.Name || 'selected provider';
               })()}</span>
             </p>
-            <div className="border border-slate-300 rounded-md overflow-hidden bg-slate-50" style={{ height: '600px' }}>
+            <div className="border border-blue-300 rounded-md overflow-hidden bg-blue-50" style={{ height: '600px' }}>
               <iframe
                 src={previewUrl}
                 className="w-full h-full"
@@ -572,10 +572,10 @@ export default function Home() {
 
         {/* Download Section */}
         {selectedPerson && formFields.length > 0 && (
-          <div className="mb-6 bg-white rounded-lg shadow-sm border border-slate-200 p-6">
+          <div className="mb-6 bg-white rounded-lg shadow-sm border border-blue-200 p-6">
             <div className="mb-4">
-              <h2 className="text-lg font-semibold text-slate-900 mb-2">Download Filled Form</h2>
-              <p className="text-sm text-slate-600">
+              <h2 className="text-lg font-semibold text-blue-900 mb-2">Download Filled Form</h2>
+              <p className="text-sm text-blue-700">
                 Ready to generate <span className="font-medium">{pdfFile?.name}</span> with data from <span className="font-medium">{(() => {
                   const firstColumnKey = Object.keys(selectedPerson)[0];
                   return selectedPerson[firstColumnKey] || selectedPerson.name || selectedPerson.Name || 'selected provider';
@@ -585,12 +585,12 @@ export default function Home() {
             <button
               onClick={handleFillPdf}
               disabled={loading}
-              className="w-full bg-slate-900 text-white py-3 px-4 rounded-md hover:bg-slate-800 disabled:bg-slate-300 disabled:cursor-not-allowed transition-colors font-medium"
+              className="w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed transition-colors font-medium"
             >
               {loading ? 'Generating PDF...' : 'Download Filled PDF'}
             </button>
             {loading && (
-              <p className="text-center text-xs text-slate-500 mt-2">Processing form data...</p>
+              <p className="text-center text-xs text-blue-600 mt-2">Processing form data...</p>
             )}
           </div>
         )}
