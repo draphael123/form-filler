@@ -237,11 +237,11 @@ export default function Home() {
                   Upload a CSV or Excel file. First row should be column headers.
                 </p>
                 {spreadsheetFile && (
-                  <div className="p-3 bg-green-50 border border-green-200 rounded">
-                    <p className="text-sm text-green-800">✓ {spreadsheetFile.name}</p>
+                  <div className="p-3 bg-green-50 border border-green-200 rounded mb-4">
+                    <p className="text-sm text-green-800 font-semibold">✓ {spreadsheetFile.name}</p>
                     {people.length > 0 && (
                       <p className="text-xs text-gray-600 mt-1">
-                        Loaded {people.length} {people.length === 1 ? 'person' : 'people'}
+                        ✅ Loaded {people.length} {people.length === 1 ? 'person' : 'people'} from spreadsheet
                       </p>
                     )}
                   </div>
@@ -279,28 +279,50 @@ export default function Home() {
             )}
 
             {people.length > 0 && (
-              <div className="mt-6">
-                <h3 className="font-semibold mb-2 text-gray-700">Select Person:</h3>
+              <div className="mt-6 p-4 bg-green-50 border-2 border-green-300 rounded-lg">
+                <h3 className="font-semibold mb-3 text-gray-800 text-lg">✅ {people.length} {people.length === 1 ? 'Person' : 'People'} Loaded</h3>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  👤 Select Person to Fill PDF:
+                </label>
                 <select
-                  onChange={(e) => setSelectedPerson(people[parseInt(e.target.value)])}
-                  className="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                  onChange={(e) => {
+                    const idx = parseInt(e.target.value);
+                    if (idx >= 0) {
+                      setSelectedPerson(people[idx]);
+                    } else {
+                      setSelectedPerson(null);
+                    }
+                  }}
+                  value={selectedPerson ? people.indexOf(selectedPerson).toString() : ''}
+                  className="w-full p-3 border-2 border-green-400 rounded-lg focus:border-green-600 focus:outline-none bg-white font-medium"
                 >
-                  <option value="">-- Choose a person --</option>
-                  {people.map((person, idx) => (
-                    <option key={idx} value={idx}>
-                      {person.name || person.Name || `Person ${idx + 1}`}
-                    </option>
-                  ))}
+                  <option value="">-- Choose a person from spreadsheet --</option>
+                  {people.map((person, idx) => {
+                    const displayName = person.name || person.Name || person['Fountain Email Address']?.split('@')[0] || `Person ${idx + 1}`;
+                    return (
+                      <option key={idx} value={idx}>
+                        {displayName}
+                      </option>
+                    );
+                  })}
                 </select>
 
                 {selectedPerson && (
-                  <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded">
-                    <p className="text-sm font-semibold text-blue-800 mb-2">Selected Data:</p>
-                    {Object.entries(selectedPerson).map(([key, value]) => (
-                      <p key={key} className="text-xs text-gray-700">
-                        <strong>{key}:</strong> {value}
-                      </p>
-                    ))}
+                  <div className="mt-4 p-4 bg-white border-2 border-green-400 rounded-lg">
+                    <p className="text-sm font-bold text-green-800 mb-3">📋 Selected Person's Information:</p>
+                    <div className="max-h-48 overflow-y-auto space-y-1">
+                      {Object.entries(selectedPerson)
+                        .filter(([key, value]) => value && String(value).trim())
+                        .slice(0, 10) // Show first 10 fields
+                        .map(([key, value]) => (
+                          <p key={key} className="text-xs text-gray-700">
+                            <strong className="text-green-700">{key}:</strong> <span className="text-gray-800">{String(value).substring(0, 50)}{String(value).length > 50 ? '...' : ''}</span>
+                          </p>
+                        ))}
+                      {Object.keys(selectedPerson).filter(key => selectedPerson[key] && String(selectedPerson[key]).trim()).length > 10 && (
+                        <p className="text-xs text-gray-500 italic">... and {Object.keys(selectedPerson).filter(key => selectedPerson[key] && String(selectedPerson[key]).trim()).length - 10} more fields</p>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>
@@ -342,14 +364,23 @@ export default function Home() {
 
         {/* Fill PDF Button */}
         {selectedPerson && formFields.length > 0 && (
-          <div className="mt-6 bg-white rounded-lg shadow-md p-6">
+          <div className="mt-6 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg shadow-lg p-6 border-2 border-green-400">
+            <div className="mb-4">
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">4. Fill PDF with Selected Person</h2>
+              <p className="text-sm text-gray-600">
+                Ready to fill <strong className="text-green-700">{pdfFile?.name}</strong> with data from <strong className="text-blue-700">{selectedPerson.name || selectedPerson.Name || 'selected person'}</strong>
+              </p>
+            </div>
             <button
               onClick={handleFillPdf}
               disabled={loading}
-              className="w-full bg-gradient-to-r from-pink-600 to-blue-600 text-white py-4 rounded-lg text-lg font-semibold hover:from-pink-700 hover:to-blue-700 disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed transition"
+              className="w-full bg-gradient-to-r from-pink-600 to-blue-600 text-white py-4 rounded-lg text-lg font-semibold hover:from-pink-700 hover:to-blue-700 disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed transition shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
             >
-              {loading ? 'Filling PDF...' : '🚀 Fill PDF Form'}
+              {loading ? '⏳ Filling PDF...' : '🚀 Fill PDF & Download'}
             </button>
+            {loading && (
+              <p className="text-center text-sm text-gray-500 mt-2">Processing your PDF...</p>
+            )}
           </div>
         )}
       </div>
