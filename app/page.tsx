@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface FormField {
   name: string;
@@ -23,6 +23,8 @@ export default function Home() {
   const [dataSource, setDataSource] = useState<'google' | 'file'>('file');
   const [spreadsheetFile, setSpreadsheetFile] = useState<File | null>(null);
   const [showHowToUse, setShowHowToUse] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
 
   // Extract fields from uploaded PDF
   const handlePdfUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -143,15 +145,126 @@ export default function Home() {
     }
   };
 
+  // Auto-map common fields
+  const autoMapFields = () => {
+    if (formFields.length === 0 || sheetColumns.length === 0) return;
+
+    const mapping: Record<string, string> = {};
+    
+    // Common field patterns
+    const fieldPatterns = {
+      name: ['name', 'provider name', 'full name', 'provider_name', 'fullname', 'provider'],
+      firstName: ['first name', 'firstname', 'first_name', 'fname'],
+      lastName: ['last name', 'lastname', 'last_name', 'lname', 'surname'],
+      address: ['address', 'street address', 'street_address', 'addr', 'address line 1', 'address_line_1'],
+      city: ['city'],
+      state: ['state'],
+      zip: ['zip', 'zip code', 'zipcode', 'zip_code', 'postal code', 'postal_code'],
+      phone: ['phone', 'phone number', 'phone_number', 'telephone', 'tel', 'mobile'],
+      email: ['email', 'e-mail', 'email address', 'email_address'],
+      npi: ['npi', 'npi #', 'npi_number', 'national provider identifier'],
+      dea: ['dea', 'dea license', 'dea_license', 'dea number', 'dea_number'],
+    };
+
+    formFields.forEach((pdfField) => {
+      const pdfFieldLower = pdfField.name.toLowerCase().trim();
+      
+      // Try to match PDF field to spreadsheet column
+      for (const [patternKey, patterns] of Object.entries(fieldPatterns)) {
+        for (const pattern of patterns) {
+          if (pdfFieldLower.includes(pattern)) {
+            // Find matching column in spreadsheet
+            const matchingColumn = sheetColumns.find(col => {
+              const colLower = col.toLowerCase().trim();
+              return colLower.includes(pattern) || 
+                     colLower.includes(patternKey) ||
+                     patterns.some(p => colLower.includes(p));
+            });
+            
+            if (matchingColumn) {
+              mapping[pdfField.name] = matchingColumn;
+              break;
+            }
+          }
+        }
+      }
+    });
+
+    setFieldMapping(prev => ({ ...prev, ...mapping }));
+  };
+
+  // Generate preview PDF
+  const generatePreview = async () => {
+    if (!pdfFile || !selectedPerson || Object.keys(fieldMapping).length === 0) {
+      return;
+    }
+
+    setPreviewLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append('pdf', pdfFile);
+      formData.append('personData', JSON.stringify(selectedPerson));
+      formData.append('fieldMapping', JSON.stringify(fieldMapping));
+
+      const response = await fetch('/api/preview-pdf', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate preview');
+      }
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      
+      // Clean up old preview URL
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+      
+      setPreviewUrl(url);
+    } catch (error) {
+      console.error('Error generating preview:', error);
+    } finally {
+      setPreviewLoading(false);
+    }
+  };
+
   // Update field mapping
   const updateMapping = (pdfField: string, sheetColumn: string) => {
-    setFieldMapping(prev => ({
-      ...prev,
+    const newMapping = {
+      ...fieldMapping,
       [pdfField]: sheetColumn,
-    }));
+    };
+    setFieldMapping(newMapping);
+    
+    // Auto-update preview if provider is selected
+    if (selectedPerson) {
+      setTimeout(() => generatePreview(), 500); // Debounce
+    }
   };
 
   const sheetColumns = people.length > 0 ? Object.keys(people[0]) : [];
+
+  // Auto-map when both PDF fields and spreadsheet columns are available
+  useEffect(() => {
+    if (formFields.length > 0 && sheetColumns.length > 0 && Object.keys(fieldMapping).length === 0) {
+      autoMapFields();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formFields.length, sheetColumns.length]);
+
+  // Generate preview when provider is selected and mapping exists
+  useEffect(() => {
+    if (selectedPerson && Object.keys(fieldMapping).length > 0 && pdfFile) {
+      const timer = setTimeout(() => {
+        generatePreview();
+      }, 300); // Debounce
+      return () => clearTimeout(timer);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedPerson, Object.keys(fieldMapping).length]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 to-blue-50 p-8">
@@ -418,10 +531,20 @@ export default function Home() {
         {/* Field Mapping Section */}
         {formFields.length > 0 && sheetColumns.length > 0 && (
           <div className="mt-6 bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-2xl font-semibold mb-4 text-purple-600">3. Map Fields</h2>
-            <p className="text-sm text-gray-600 mb-4">
-              Match PDF form fields to your spreadsheet columns:
-            </p>
+            <div className="flex justify-between items-center mb-4">
+              <div>
+                <h2 className="text-2xl font-semibold text-purple-600">3. Map Fields</h2>
+                <p className="text-sm text-gray-600 mt-1">
+                  Fields are auto-mapped when possible. Review and adjust as needed:
+                </p>
+              </div>
+              <button
+                onClick={autoMapFields}
+                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-sm font-medium"
+              >
+                🔄 Re-Auto Map
+              </button>
+            </div>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
               {formFields.map((field) => (
@@ -444,6 +567,34 @@ export default function Home() {
                 </div>
               ))}
             </div>
+          </div>
+        )}
+
+        {/* Live Preview Section */}
+        {previewUrl && selectedPerson && (
+          <div className="mt-6 bg-white rounded-lg shadow-lg p-6 border-2 border-blue-400">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold text-gray-800">📄 Live Preview</h2>
+              {previewLoading && (
+                <span className="text-sm text-gray-500">Updating preview...</span>
+              )}
+            </div>
+            <p className="text-sm text-gray-600 mb-4">
+              Preview of the filled form for <strong className="text-blue-700">{(() => {
+                const firstColumnKey = Object.keys(selectedPerson)[0];
+                return selectedPerson[firstColumnKey] || selectedPerson.name || selectedPerson.Name || 'selected provider';
+              })()}</strong>
+            </p>
+            <div className="border-2 border-gray-300 rounded-lg overflow-hidden bg-gray-100" style={{ height: '600px' }}>
+              <iframe
+                src={previewUrl}
+                className="w-full h-full"
+                title="PDF Preview"
+              />
+            </div>
+            <p className="text-xs text-gray-500 mt-2 italic">
+              💡 Fields are automatically mapped based on common patterns (name, address, phone, email, etc.)
+            </p>
           </div>
         )}
 
