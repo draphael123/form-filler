@@ -20,6 +20,8 @@ export default function Home() {
   const [fieldMapping, setFieldMapping] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [sheetId, setSheetId] = useState('');
+  const [dataSource, setDataSource] = useState<'google' | 'file'>('file');
+  const [spreadsheetFile, setSpreadsheetFile] = useState<File | null>(null);
 
   // Extract fields from uploaded PDF
   const handlePdfUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -63,10 +65,45 @@ export default function Home() {
     try {
       const response = await fetch(`/api/sheets?sheetId=${sheetId}`);
       const data = await response.json();
+      if (data.error) {
+        alert(data.error);
+        return;
+      }
       setPeople(data.people);
     } catch (error) {
       console.error('Error fetching people:', error);
       alert('Error fetching Google Sheets data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Parse uploaded spreadsheet file (CSV/Excel)
+  const handleSpreadsheetUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setSpreadsheetFile(file);
+    setLoading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/parse-spreadsheet', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+      if (data.error) {
+        alert(data.error);
+        return;
+      }
+      setPeople(data.people);
+    } catch (error) {
+      console.error('Error parsing spreadsheet:', error);
+      alert('Error parsing spreadsheet file');
     } finally {
       setLoading(false);
     }
@@ -156,33 +193,90 @@ export default function Home() {
             )}
           </div>
 
-          {/* Right Column - Google Sheets */}
+          {/* Right Column - Data Source */}
           <div className="bg-white rounded-lg shadow-md p-6">
             <h2 className="text-2xl font-semibold mb-4 text-blue-600">2. Connect Data Source</h2>
             
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Google Sheet ID:
-              </label>
-              <input
-                type="text"
-                value={sheetId}
-                onChange={(e) => setSheetId(e.target.value)}
-                placeholder="Paste your Google Sheet ID here"
-                className="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                Find this in your Sheet URL: docs.google.com/spreadsheets/d/<strong>[SHEET_ID]</strong>/edit
-              </p>
+            {/* Data Source Toggle */}
+            <div className="mb-4 flex gap-2">
+              <button
+                onClick={() => setDataSource('file')}
+                className={`flex-1 py-2 px-4 rounded-lg font-medium transition ${
+                  dataSource === 'file'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+              >
+                📄 Upload File
+              </button>
+              <button
+                onClick={() => setDataSource('google')}
+                className={`flex-1 py-2 px-4 rounded-lg font-medium transition ${
+                  dataSource === 'google'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+              >
+                🔗 Google Sheets
+              </button>
             </div>
 
-            <button
-              onClick={handleFetchPeople}
-              disabled={loading || !sheetId}
-              className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition"
-            >
-              {loading ? 'Fetching...' : 'Fetch People Data'}
-            </button>
+            {/* File Upload Option */}
+            {dataSource === 'file' && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Upload Spreadsheet (CSV or Excel):
+                </label>
+                <input
+                  type="file"
+                  accept=".csv,.xlsx,.xls"
+                  onChange={handleSpreadsheetUpload}
+                  className="mb-2 w-full p-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                />
+                <p className="text-xs text-gray-500 mb-4">
+                  Upload a CSV or Excel file. First row should be column headers.
+                </p>
+                {spreadsheetFile && (
+                  <div className="p-3 bg-green-50 border border-green-200 rounded">
+                    <p className="text-sm text-green-800">✓ {spreadsheetFile.name}</p>
+                    {people.length > 0 && (
+                      <p className="text-xs text-gray-600 mt-1">
+                        Loaded {people.length} {people.length === 1 ? 'person' : 'people'}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Google Sheets Option */}
+            {dataSource === 'google' && (
+              <div>
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Google Sheet ID:
+                  </label>
+                  <input
+                    type="text"
+                    value={sheetId}
+                    onChange={(e) => setSheetId(e.target.value)}
+                    placeholder="Paste your Google Sheet ID here"
+                    className="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Find this in your Sheet URL: docs.google.com/spreadsheets/d/<strong>[SHEET_ID]</strong>/edit
+                  </p>
+                </div>
+
+                <button
+                  onClick={handleFetchPeople}
+                  disabled={loading || !sheetId}
+                  className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition"
+                >
+                  {loading ? 'Fetching...' : 'Fetch People Data'}
+                </button>
+              </div>
+            )}
 
             {people.length > 0 && (
               <div className="mt-6">
@@ -219,7 +313,7 @@ export default function Home() {
           <div className="mt-6 bg-white rounded-lg shadow-md p-6">
             <h2 className="text-2xl font-semibold mb-4 text-purple-600">3. Map Fields</h2>
             <p className="text-sm text-gray-600 mb-4">
-              Match PDF form fields to your Google Sheet columns:
+              Match PDF form fields to your spreadsheet columns:
             </p>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
