@@ -267,177 +267,156 @@ export default function Home() {
   }, [selectedPerson, Object.keys(fieldMapping).length]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 to-blue-50 p-8">
-      <div className="max-w-6xl mx-auto">
-        <div className="flex justify-between items-start mb-6">
-          <div>
-            <h1 className="text-4xl font-bold text-gray-800 mb-2">Provider Compliance Dashboard</h1>
-            <p className="text-gray-600">PDF Form Filler - Select a provider from Column 1 to fill forms</p>
+    <div className="min-h-screen bg-slate-50">
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        {/* Header */}
+        <header className="mb-8 pb-6 border-b border-slate-200">
+          <div className="flex justify-between items-start">
+            <div>
+              <h1 className="text-3xl font-semibold text-slate-900 mb-1">Provider Compliance Dashboard</h1>
+              <p className="text-slate-600 text-sm">PDF form automation tool</p>
+            </div>
+            <button
+              onClick={() => setShowHowToUse(!showHowToUse)}
+              className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-md hover:bg-slate-50 transition-colors"
+            >
+              {showHowToUse ? 'Hide Guide' : 'How to Use'}
+            </button>
           </div>
-          <button
-            onClick={() => setShowHowToUse(!showHowToUse)}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition shadow-md"
-          >
-            {showHowToUse ? '✕ Hide' : '❓ How to Use'}
-          </button>
-        </div>
+        </header>
 
         {/* How to Use Section */}
         {showHowToUse && (
-          <div className="mb-8 bg-white rounded-lg shadow-lg p-6 border-2 border-blue-300">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">📖 How to Use This Tool</h2>
+          <div className="mb-8 bg-white rounded-lg shadow-sm border border-slate-200 p-6">
+            <h2 className="text-xl font-semibold text-slate-900 mb-6">How to Use</h2>
             
             <div className="space-y-4">
-              <div className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500">
-                <h3 className="font-semibold text-lg text-blue-800 mb-2">Step 1: Upload Your PDF Form</h3>
-                <p className="text-gray-700 text-sm">
-                  Click "Choose File" and select your PDF form (like "Belmar Form"). The app will automatically detect all fillable fields.
+              <div className="border-l-4 border-slate-300 pl-4">
+                <h3 className="font-medium text-slate-900 mb-1">Step 1: Upload PDF Form</h3>
+                <p className="text-slate-600 text-sm">
+                  Select your PDF form. The application will automatically detect all fillable fields.
                 </p>
               </div>
 
-              <div className="bg-green-50 p-4 rounded-lg border-l-4 border-green-500">
-                <h3 className="font-semibold text-lg text-green-800 mb-2">Step 2: Upload Provider Compliance Dashboard</h3>
-                <p className="text-gray-700 text-sm mb-2">
-                  Click "📄 Upload File" and select your Provider Compliance Dashboard CSV or Excel file. <strong>Column 1 will be used as the provider identifier.</strong>
-                </p>
-                <p className="text-xs text-gray-600 italic">
-                  💡 Tip: You can also use Google Sheets by clicking the "🔗 Google Sheets" button.
+              <div className="border-l-4 border-slate-300 pl-4">
+                <h3 className="font-medium text-slate-900 mb-1">Step 2: Upload Provider Data</h3>
+                <p className="text-slate-600 text-sm">
+                  Upload your Provider Compliance Dashboard file (CSV or Excel). Column 1 will be used as the provider identifier. Alternatively, connect to Google Sheets.
                 </p>
               </div>
 
-              <div className="bg-purple-50 p-4 rounded-lg border-l-4 border-purple-500">
-                <h3 className="font-semibold text-lg text-purple-800 mb-2">Step 3: Map Fields (One-Time Setup)</h3>
-                <p className="text-gray-700 text-sm">
-                  Match each PDF field to the corresponding column in your spreadsheet. For example: PDF field "Provider Name" → Spreadsheet column "Name". You only need to do this once per PDF template.
+              <div className="border-l-4 border-slate-300 pl-4">
+                <h3 className="font-medium text-slate-900 mb-1">Step 3: Map Fields</h3>
+                <p className="text-slate-600 text-sm">
+                  Fields are automatically mapped when possible. Review and adjust mappings as needed. This only needs to be done once per PDF template.
                 </p>
               </div>
 
-              <div className="bg-orange-50 p-4 rounded-lg border-l-4 border-orange-500">
-                <h3 className="font-semibold text-lg text-orange-800 mb-2">Step 4: Select a Provider 👤</h3>
-                <p className="text-gray-700 text-sm mb-2">
-                  After your Provider Compliance Dashboard loads, a dropdown will appear with all providers (using Column 1 as identifier). <strong>Select the provider</strong> you want to fill the PDF for.
-                </p>
-                <p className="text-xs text-gray-600 italic">
-                  💡 You'll see their information preview below the dropdown.
+              <div className="border-l-4 border-slate-300 pl-4">
+                <h3 className="font-medium text-slate-900 mb-1">Step 4: Select Provider</h3>
+                <p className="text-slate-600 text-sm">
+                  Choose a provider from the dropdown. The form preview will update automatically with their information.
                 </p>
               </div>
 
-              <div className="bg-pink-50 p-4 rounded-lg border-l-4 border-pink-500">
-                <h3 className="font-semibold text-lg text-pink-800 mb-2">Step 5: Fill & Download 🚀</h3>
-                <p className="text-gray-700 text-sm">
-                  Click the "🚀 Fill PDF & Download" button. The PDF will be automatically filled with the selected person's data and download to your computer!
+              <div className="border-l-4 border-slate-300 pl-4">
+                <h3 className="font-medium text-slate-900 mb-1">Step 5: Download</h3>
+                <p className="text-slate-600 text-sm">
+                  Review the preview, then download the filled PDF form.
                 </p>
-              </div>
-
-              <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-300">
-                <h4 className="font-semibold text-gray-800 mb-2">💡 Quick Tips:</h4>
-                <ul className="text-sm text-gray-700 space-y-1 list-disc list-inside">
-                  <li>You can fill multiple PDFs - just select a different person each time</li>
-                  <li>Field mapping is saved during your session (until you refresh the page)</li>
-                  <li>Only text fields are filled - checkboxes are excluded</li>
-                  <li>Empty cells in your spreadsheet will leave PDF fields blank</li>
-                </ul>
-              </div>
-
-              <div className="mt-4 p-4 bg-yellow-50 rounded-lg border border-yellow-300">
-                <h4 className="font-semibold text-yellow-800 mb-2">📋 Spreadsheet Format:</h4>
-                <p className="text-sm text-gray-700 mb-2">
-                  Your spreadsheet should have:
-                </p>
-                <ul className="text-sm text-gray-700 space-y-1 list-disc list-inside">
-                  <li><strong>First row = Column headers</strong> (Name, Email, Address, etc.)</li>
-                  <li><strong>Each row = One person/provider</strong></li>
-                  <li><strong>Supported formats:</strong> CSV (.csv) or Excel (.xlsx, .xls)</li>
-                </ul>
               </div>
             </div>
           </div>
         )}
 
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid md:grid-cols-2 gap-6 mb-6">
           {/* Left Column - PDF Upload */}
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-2xl font-semibold mb-4 text-pink-600">1. Upload PDF Form</h2>
+          <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
+            <h2 className="text-lg font-semibold text-slate-900 mb-4">1. Upload PDF Form</h2>
             
-            <input
-              type="file"
-              accept=".pdf"
-              onChange={handlePdfUpload}
-              className="mb-4 w-full p-3 border-2 border-gray-300 rounded-lg focus:border-pink-500 focus:outline-none"
-            />
+            <label className="block">
+              <input
+                type="file"
+                accept=".pdf"
+                onChange={handlePdfUpload}
+                className="block w-full text-sm text-slate-600 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-slate-50 file:text-slate-700 hover:file:bg-slate-100 cursor-pointer"
+              />
+            </label>
 
             {pdfFile && (
-              <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded">
-                <p className="text-sm text-green-800">✓ {pdfFile.name}</p>
-                <p className="text-xs text-gray-600 mt-1">
-                  Found {formFields.length} fields (checkboxes excluded)
+              <div className="mt-4 p-3 bg-slate-50 border border-slate-200 rounded-md">
+                <p className="text-sm font-medium text-slate-900">{pdfFile.name}</p>
+                <p className="text-xs text-slate-600 mt-1">
+                  {formFields.length} fillable fields detected
                 </p>
               </div>
             )}
 
             {formFields.length > 0 && (
               <div className="mt-6">
-                <h3 className="font-semibold mb-2 text-gray-700">PDF Form Fields:</h3>
-                <div className="max-h-64 overflow-y-auto bg-gray-50 p-3 rounded">
-                  {formFields.map((field, idx) => (
-                    <div key={idx} className="text-sm py-1 text-gray-700">
-                      • {field.name}
-                    </div>
-                  ))}
+                <h3 className="text-sm font-medium text-slate-900 mb-2">Form Fields</h3>
+                <div className="max-h-64 overflow-y-auto bg-slate-50 border border-slate-200 rounded-md p-3">
+                  <div className="space-y-1">
+                    {formFields.map((field, idx) => (
+                      <div key={idx} className="text-sm text-slate-700 py-1">
+                        {field.name}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             )}
           </div>
 
           {/* Right Column - Data Source */}
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-2xl font-semibold mb-4 text-blue-600">2. Connect Data Source</h2>
+          <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
+            <h2 className="text-lg font-semibold text-slate-900 mb-4">2. Connect Data Source</h2>
             
             {/* Data Source Toggle */}
             <div className="mb-4 flex gap-2">
               <button
                 onClick={() => setDataSource('file')}
-                className={`flex-1 py-2 px-4 rounded-lg font-medium transition ${
+                className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
                   dataSource === 'file'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    ? 'bg-slate-900 text-white'
+                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                 }`}
               >
-                📄 Upload File
+                Upload File
               </button>
               <button
                 onClick={() => setDataSource('google')}
-                className={`flex-1 py-2 px-4 rounded-lg font-medium transition ${
+                className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
                   dataSource === 'google'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    ? 'bg-slate-900 text-white'
+                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                 }`}
               >
-                🔗 Google Sheets
+                Google Sheets
               </button>
             </div>
 
             {/* File Upload Option */}
             {dataSource === 'file' && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Upload Provider Compliance Dashboard (CSV or Excel):
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Upload Provider Compliance Dashboard
                 </label>
                 <input
                   type="file"
                   accept=".csv,.xlsx,.xls"
                   onChange={handleSpreadsheetUpload}
-                  className="mb-2 w-full p-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                  className="block w-full text-sm text-slate-600 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-slate-50 file:text-slate-700 hover:file:bg-slate-100 cursor-pointer"
                 />
-                <p className="text-xs text-gray-500 mb-4">
-                  Upload your Provider Compliance Dashboard file. <strong>Column 1 will be used as the provider identifier.</strong>
+                <p className="text-xs text-slate-500 mt-2 mb-4">
+                  Column 1 will be used as the provider identifier
                 </p>
                 {spreadsheetFile && (
-                  <div className="p-3 bg-green-50 border border-green-200 rounded mb-4">
-                    <p className="text-sm text-green-800 font-semibold">✓ {spreadsheetFile.name}</p>
+                  <div className="p-3 bg-slate-50 border border-slate-200 rounded-md mb-4">
+                    <p className="text-sm font-medium text-slate-900">{spreadsheetFile.name}</p>
                     {people.length > 0 && (
-                      <p className="text-xs text-gray-600 mt-1">
-                        ✅ Loaded {people.length} {people.length === 1 ? 'person' : 'people'} from spreadsheet
+                      <p className="text-xs text-slate-600 mt-1">
+                        {people.length} {people.length === 1 ? 'provider' : 'providers'} loaded
                       </p>
                     )}
                   </div>
@@ -449,36 +428,36 @@ export default function Home() {
             {dataSource === 'google' && (
               <div>
                 <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Google Sheet ID:
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Google Sheet ID
                   </label>
                   <input
                     type="text"
                     value={sheetId}
                     onChange={(e) => setSheetId(e.target.value)}
-                    placeholder="Paste your Google Sheet ID here"
-                    className="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                    placeholder="Enter Google Sheet ID"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
                   />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Find this in your Sheet URL: docs.google.com/spreadsheets/d/<strong>[SHEET_ID]</strong>/edit
+                  <p className="text-xs text-slate-500 mt-1">
+                    Found in Sheet URL: docs.google.com/spreadsheets/d/[SHEET_ID]/edit
                   </p>
                 </div>
 
                 <button
                   onClick={handleFetchPeople}
                   disabled={loading || !sheetId}
-                  className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition"
+                  className="w-full bg-slate-900 text-white py-2 px-4 rounded-md hover:bg-slate-800 disabled:bg-slate-300 disabled:cursor-not-allowed transition-colors text-sm font-medium"
                 >
-                  {loading ? 'Fetching...' : 'Fetch Provider Data'}
+                  {loading ? 'Loading...' : 'Fetch Data'}
                 </button>
               </div>
             )}
 
             {people.length > 0 && (
-              <div className="mt-6 p-4 bg-green-50 border-2 border-green-300 rounded-lg">
-                <h3 className="font-semibold mb-3 text-gray-800 text-lg">✅ {people.length} {people.length === 1 ? 'Provider' : 'Providers'} Loaded from Column 1</h3>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  👤 Select Provider (Column 1) to Fill PDF:
+              <div className="mt-6 p-4 bg-slate-50 border border-slate-200 rounded-md">
+                <h3 className="text-sm font-semibold text-slate-900 mb-3">{people.length} {people.length === 1 ? 'Provider' : 'Providers'} Loaded</h3>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Select Provider
                 </label>
                 <select
                   onChange={(e) => {
@@ -490,11 +469,10 @@ export default function Home() {
                     }
                   }}
                   value={selectedPerson ? people.indexOf(selectedPerson).toString() : ''}
-                  className="w-full p-3 border-2 border-green-400 rounded-lg focus:border-green-600 focus:outline-none bg-white font-medium"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent bg-white"
                 >
-                  <option value="">-- Choose a provider from Column 1 --</option>
+                  <option value="">Select a provider</option>
                   {people.map((person, idx) => {
-                    // Use Column 1 (first column) as the person identifier
                     const firstColumnKey = Object.keys(person)[0];
                     const displayName = person[firstColumnKey] || person.name || person.Name || person['Fountain Email Address']?.split('@')[0] || `Provider ${idx + 1}`;
                     return (
@@ -506,20 +484,17 @@ export default function Home() {
                 </select>
 
                 {selectedPerson && (
-                  <div className="mt-4 p-4 bg-white border-2 border-green-400 rounded-lg">
-                    <p className="text-sm font-bold text-green-800 mb-3">📋 Selected Provider's Information (from Column 1):</p>
+                  <div className="mt-4 p-3 bg-white border border-slate-200 rounded-md">
+                    <p className="text-xs font-medium text-slate-900 mb-2">Provider Information</p>
                     <div className="max-h-48 overflow-y-auto space-y-1">
                       {Object.entries(selectedPerson)
                         .filter(([key, value]) => value && String(value).trim())
-                        .slice(0, 10) // Show first 10 fields
+                        .slice(0, 8)
                         .map(([key, value]) => (
-                          <p key={key} className="text-xs text-gray-700">
-                            <strong className="text-green-700">{key}:</strong> <span className="text-gray-800">{String(value).substring(0, 50)}{String(value).length > 50 ? '...' : ''}</span>
+                          <p key={key} className="text-xs text-slate-600">
+                            <span className="font-medium text-slate-700">{key}:</span> {String(value).substring(0, 50)}{String(value).length > 50 ? '...' : ''}
                           </p>
                         ))}
-                      {Object.keys(selectedPerson).filter(key => selectedPerson[key] && String(selectedPerson[key]).trim()).length > 10 && (
-                        <p className="text-xs text-gray-500 italic">... and {Object.keys(selectedPerson).filter(key => selectedPerson[key] && String(selectedPerson[key]).trim()).length - 10} more fields</p>
-                      )}
                     </div>
                   </div>
                 )}
@@ -530,34 +505,34 @@ export default function Home() {
 
         {/* Field Mapping Section */}
         {formFields.length > 0 && sheetColumns.length > 0 && (
-          <div className="mt-6 bg-white rounded-lg shadow-md p-6">
+          <div className="mb-6 bg-white rounded-lg shadow-sm border border-slate-200 p-6">
             <div className="flex justify-between items-center mb-4">
               <div>
-                <h2 className="text-2xl font-semibold text-purple-600">3. Map Fields</h2>
-                <p className="text-sm text-gray-600 mt-1">
-                  Fields are auto-mapped when possible. Review and adjust as needed:
+                <h2 className="text-lg font-semibold text-slate-900">3. Map Fields</h2>
+                <p className="text-sm text-slate-600 mt-1">
+                  Fields are automatically mapped. Review and adjust as needed.
                 </p>
               </div>
               <button
                 onClick={autoMapFields}
-                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-sm font-medium"
+                className="px-3 py-1.5 bg-slate-100 text-slate-700 rounded-md hover:bg-slate-200 text-sm font-medium transition-colors"
               >
-                🔄 Re-Auto Map
+                Re-map Fields
               </button>
             </div>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
               {formFields.map((field) => (
-                <div key={field.name} className="border border-gray-200 rounded-lg p-3">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                <div key={field.name} className="border border-slate-200 rounded-md p-3">
+                  <label className="block text-xs font-medium text-slate-700 mb-1.5">
                     {field.name}
                   </label>
                   <select
                     value={fieldMapping[field.name] || ''}
                     onChange={(e) => updateMapping(field.name, e.target.value)}
-                    className="w-full p-2 border border-gray-300 rounded focus:border-purple-500 focus:outline-none text-sm"
+                    className="w-full px-2 py-1.5 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent text-sm"
                   >
-                    <option value="">-- Skip this field --</option>
+                    <option value="">Skip field</option>
                     {sheetColumns.map((col) => (
                       <option key={col} value={col}>
                         {col}
@@ -572,53 +547,50 @@ export default function Home() {
 
         {/* Live Preview Section */}
         {previewUrl && selectedPerson && (
-          <div className="mt-6 bg-white rounded-lg shadow-lg p-6 border-2 border-blue-400">
+          <div className="mb-6 bg-white rounded-lg shadow-sm border border-slate-200 p-6">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold text-gray-800">📄 Live Preview</h2>
+              <h2 className="text-lg font-semibold text-slate-900">Form Preview</h2>
               {previewLoading && (
-                <span className="text-sm text-gray-500">Updating preview...</span>
+                <span className="text-xs text-slate-500">Updating...</span>
               )}
             </div>
-            <p className="text-sm text-gray-600 mb-4">
-              Preview of the filled form for <strong className="text-blue-700">{(() => {
+            <p className="text-sm text-slate-600 mb-4">
+              Preview for <span className="font-medium text-slate-900">{(() => {
                 const firstColumnKey = Object.keys(selectedPerson)[0];
                 return selectedPerson[firstColumnKey] || selectedPerson.name || selectedPerson.Name || 'selected provider';
-              })()}</strong>
+              })()}</span>
             </p>
-            <div className="border-2 border-gray-300 rounded-lg overflow-hidden bg-gray-100" style={{ height: '600px' }}>
+            <div className="border border-slate-300 rounded-md overflow-hidden bg-slate-50" style={{ height: '600px' }}>
               <iframe
                 src={previewUrl}
                 className="w-full h-full"
                 title="PDF Preview"
               />
             </div>
-            <p className="text-xs text-gray-500 mt-2 italic">
-              💡 Fields are automatically mapped based on common patterns (name, address, phone, email, etc.)
-            </p>
           </div>
         )}
 
-        {/* Fill PDF Button */}
+        {/* Download Section */}
         {selectedPerson && formFields.length > 0 && (
-          <div className="mt-6 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg shadow-lg p-6 border-2 border-green-400">
+          <div className="mb-6 bg-white rounded-lg shadow-sm border border-slate-200 p-6">
             <div className="mb-4">
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">4. Fill PDF with Selected Person</h2>
-              <p className="text-sm text-gray-600">
-                Ready to fill <strong className="text-green-700">{pdfFile?.name}</strong> with data from <strong className="text-blue-700">{(() => {
+              <h2 className="text-lg font-semibold text-slate-900 mb-2">Download Filled Form</h2>
+              <p className="text-sm text-slate-600">
+                Ready to generate <span className="font-medium">{pdfFile?.name}</span> with data from <span className="font-medium">{(() => {
                   const firstColumnKey = Object.keys(selectedPerson)[0];
                   return selectedPerson[firstColumnKey] || selectedPerson.name || selectedPerson.Name || 'selected provider';
-                })()}</strong>
+                })()}</span>
               </p>
             </div>
             <button
               onClick={handleFillPdf}
               disabled={loading}
-              className="w-full bg-gradient-to-r from-pink-600 to-blue-600 text-white py-4 rounded-lg text-lg font-semibold hover:from-pink-700 hover:to-blue-700 disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed transition shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+              className="w-full bg-slate-900 text-white py-3 px-4 rounded-md hover:bg-slate-800 disabled:bg-slate-300 disabled:cursor-not-allowed transition-colors font-medium"
             >
-              {loading ? '⏳ Filling PDF...' : '🚀 Fill PDF & Download'}
+              {loading ? 'Generating PDF...' : 'Download Filled PDF'}
             </button>
             {loading && (
-              <p className="text-center text-sm text-gray-500 mt-2">Processing your PDF...</p>
+              <p className="text-center text-xs text-slate-500 mt-2">Processing form data...</p>
             )}
           </div>
         )}
