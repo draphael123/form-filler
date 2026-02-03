@@ -158,8 +158,8 @@ export default function Home() {
       <div className="max-w-6xl mx-auto">
         <div className="flex justify-between items-start mb-6">
           <div>
-            <h1 className="text-4xl font-bold text-gray-800 mb-2">PDF Form Filler</h1>
-            <p className="text-gray-600">Fountain Provider Onboarding Tool</p>
+            <h1 className="text-4xl font-bold text-gray-800 mb-2">Provider Compliance Dashboard</h1>
+            <p className="text-gray-600">PDF Form Filler - Select a provider from Column 1 to fill forms</p>
           </div>
           <button
             onClick={() => setShowHowToUse(!showHowToUse)}
@@ -183,9 +183,9 @@ export default function Home() {
               </div>
 
               <div className="bg-green-50 p-4 rounded-lg border-l-4 border-green-500">
-                <h3 className="font-semibold text-lg text-green-800 mb-2">Step 2: Upload Your Spreadsheet</h3>
+                <h3 className="font-semibold text-lg text-green-800 mb-2">Step 2: Upload Provider Compliance Dashboard</h3>
                 <p className="text-gray-700 text-sm mb-2">
-                  Click "📄 Upload File" and select your CSV or Excel file with provider data. Make sure the first row contains column headers (Name, Address, Phone, etc.).
+                  Click "📄 Upload File" and select your Provider Compliance Dashboard CSV or Excel file. <strong>Column 1 will be used as the provider identifier.</strong>
                 </p>
                 <p className="text-xs text-gray-600 italic">
                   💡 Tip: You can also use Google Sheets by clicking the "🔗 Google Sheets" button.
@@ -200,9 +200,9 @@ export default function Home() {
               </div>
 
               <div className="bg-orange-50 p-4 rounded-lg border-l-4 border-orange-500">
-                <h3 className="font-semibold text-lg text-orange-800 mb-2">Step 4: Select a Person 👤</h3>
+                <h3 className="font-semibold text-lg text-orange-800 mb-2">Step 4: Select a Provider 👤</h3>
                 <p className="text-gray-700 text-sm mb-2">
-                  After your spreadsheet loads, a dropdown will appear with all people from your file. <strong>Select the person</strong> you want to fill the PDF for.
+                  After your Provider Compliance Dashboard loads, a dropdown will appear with all providers (using Column 1 as identifier). <strong>Select the provider</strong> you want to fill the PDF for.
                 </p>
                 <p className="text-xs text-gray-600 italic">
                   💡 You'll see their information preview below the dropdown.
@@ -308,7 +308,7 @@ export default function Home() {
             {dataSource === 'file' && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Upload Spreadsheet (CSV or Excel):
+                  Upload Provider Compliance Dashboard (CSV or Excel):
                 </label>
                 <input
                   type="file"
@@ -317,7 +317,7 @@ export default function Home() {
                   className="mb-2 w-full p-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
                 />
                 <p className="text-xs text-gray-500 mb-4">
-                  Upload a CSV or Excel file. First row should be column headers.
+                  Upload your Provider Compliance Dashboard file. <strong>Column 1 will be used as the provider identifier.</strong>
                 </p>
                 {spreadsheetFile && (
                   <div className="p-3 bg-green-50 border border-green-200 rounded mb-4">
@@ -356,16 +356,16 @@ export default function Home() {
                   disabled={loading || !sheetId}
                   className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition"
                 >
-                  {loading ? 'Fetching...' : 'Fetch People Data'}
+                  {loading ? 'Fetching...' : 'Fetch Provider Data'}
                 </button>
               </div>
             )}
 
             {people.length > 0 && (
               <div className="mt-6 p-4 bg-green-50 border-2 border-green-300 rounded-lg">
-                <h3 className="font-semibold mb-3 text-gray-800 text-lg">✅ {people.length} {people.length === 1 ? 'Person' : 'People'} Loaded</h3>
+                <h3 className="font-semibold mb-3 text-gray-800 text-lg">✅ {people.length} {people.length === 1 ? 'Provider' : 'Providers'} Loaded from Column 1</h3>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  👤 Select Person to Fill PDF:
+                  👤 Select Provider (Column 1) to Fill PDF:
                 </label>
                 <select
                   onChange={(e) => {
@@ -379,9 +379,11 @@ export default function Home() {
                   value={selectedPerson ? people.indexOf(selectedPerson).toString() : ''}
                   className="w-full p-3 border-2 border-green-400 rounded-lg focus:border-green-600 focus:outline-none bg-white font-medium"
                 >
-                  <option value="">-- Choose a person from spreadsheet --</option>
+                  <option value="">-- Choose a provider from Column 1 --</option>
                   {people.map((person, idx) => {
-                    const displayName = person.name || person.Name || person['Fountain Email Address']?.split('@')[0] || `Person ${idx + 1}`;
+                    // Use Column 1 (first column) as the person identifier
+                    const firstColumnKey = Object.keys(person)[0];
+                    const displayName = person[firstColumnKey] || person.name || person.Name || person['Fountain Email Address']?.split('@')[0] || `Provider ${idx + 1}`;
                     return (
                       <option key={idx} value={idx}>
                         {displayName}
@@ -392,7 +394,7 @@ export default function Home() {
 
                 {selectedPerson && (
                   <div className="mt-4 p-4 bg-white border-2 border-green-400 rounded-lg">
-                    <p className="text-sm font-bold text-green-800 mb-3">📋 Selected Person's Information:</p>
+                    <p className="text-sm font-bold text-green-800 mb-3">📋 Selected Provider's Information (from Column 1):</p>
                     <div className="max-h-48 overflow-y-auto space-y-1">
                       {Object.entries(selectedPerson)
                         .filter(([key, value]) => value && String(value).trim())
@@ -451,7 +453,10 @@ export default function Home() {
             <div className="mb-4">
               <h2 className="text-2xl font-bold text-gray-800 mb-2">4. Fill PDF with Selected Person</h2>
               <p className="text-sm text-gray-600">
-                Ready to fill <strong className="text-green-700">{pdfFile?.name}</strong> with data from <strong className="text-blue-700">{selectedPerson.name || selectedPerson.Name || 'selected person'}</strong>
+                Ready to fill <strong className="text-green-700">{pdfFile?.name}</strong> with data from <strong className="text-blue-700">{(() => {
+                  const firstColumnKey = Object.keys(selectedPerson)[0];
+                  return selectedPerson[firstColumnKey] || selectedPerson.name || selectedPerson.Name || 'selected provider';
+                })()}</strong>
               </p>
             </div>
             <button
