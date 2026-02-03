@@ -145,47 +145,92 @@ export default function Home() {
     }
   };
 
-  // Auto-map common fields
+  // Enhanced auto-map function with comprehensive field matching
   const autoMapFields = () => {
     if (formFields.length === 0 || sheetColumns.length === 0) return;
 
     const mapping: Record<string, string> = {};
     
-    // Common field patterns
-    const fieldPatterns = {
-      name: ['name', 'provider name', 'full name', 'provider_name', 'fullname', 'provider'],
-      firstName: ['first name', 'firstname', 'first_name', 'fname'],
-      lastName: ['last name', 'lastname', 'last_name', 'lname', 'surname'],
-      address: ['address', 'street address', 'street_address', 'addr', 'address line 1', 'address_line_1'],
+    // Comprehensive field patterns for Provider Compliance Dashboard
+    const fieldPatterns: Record<string, string[]> = {
+      // Name variations
+      name: ['name', 'provider name', 'full name', 'provider_name', 'fullname', 'provider', 'column 1'],
+      firstName: ['first name', 'firstname', 'first_name', 'fname', 'first'],
+      lastName: ['last name', 'lastname', 'last_name', 'lname', 'surname', 'last'],
+      
+      // Contact information
+      address: ['address', 'street address', 'street_address', 'addr', 'address line 1', 'address_line_1', 'street'],
       city: ['city'],
       state: ['state'],
-      zip: ['zip', 'zip code', 'zipcode', 'zip_code', 'postal code', 'postal_code'],
-      phone: ['phone', 'phone number', 'phone_number', 'telephone', 'tel', 'mobile'],
-      email: ['email', 'e-mail', 'email address', 'email_address'],
-      npi: ['npi', 'npi #', 'npi_number', 'national provider identifier'],
-      dea: ['dea', 'dea license', 'dea_license', 'dea number', 'dea_number'],
+      zip: ['zip', 'zip code', 'zipcode', 'zip_code', 'postal code', 'postal_code', 'postal'],
+      phone: ['phone', 'phone number', 'phone_number', 'telephone', 'tel', 'mobile', 'cell'],
+      email: ['email', 'e-mail', 'email address', 'email_address', 'fountain email', 'personal email'],
+      
+      // Professional identifiers
+      npi: ['npi', 'npi #', 'npi_number', 'national provider identifier', 'npi#'],
+      dea: ['dea', 'dea license', 'dea_license', 'dea number', 'dea_number', 'dea license number'],
+      license: ['license', 'license number', 'license_number', 'lic', 'state license'],
+      
+      // Emergency contact
+      emergencyContact: ['emergency contact', 'emergency_contact', 'emergency', 'emergency name', 'emergency contact name'],
+      emergencyPhone: ['emergency phone', 'emergency_phone', 'emergency number', 'emergency contact number'],
+      
+      // Dates
+      date: ['date', 'start date', 'contract start date', 'start_date', 'contract date'],
+      
+      // Additional fields
+      notes: ['notes', 'note', 'comments', 'comment'],
     };
 
+    // Also try direct column name matching (case-insensitive, partial match)
     formFields.forEach((pdfField) => {
       const pdfFieldLower = pdfField.name.toLowerCase().trim();
+      let matched = false;
       
-      // Try to match PDF field to spreadsheet column
+      // First, try pattern-based matching
       for (const [patternKey, patterns] of Object.entries(fieldPatterns)) {
         for (const pattern of patterns) {
-          if (pdfFieldLower.includes(pattern)) {
-            // Find matching column in spreadsheet
+          if (pdfFieldLower.includes(pattern) || pattern.includes(pdfFieldLower)) {
+            // Find best matching column in spreadsheet
             const matchingColumn = sheetColumns.find(col => {
               const colLower = col.toLowerCase().trim();
-              return colLower.includes(pattern) || 
-                     colLower.includes(patternKey) ||
-                     patterns.some(p => colLower.includes(p));
+              // Exact match
+              if (colLower === pattern || colLower === patternKey) return true;
+              // Contains pattern
+              if (colLower.includes(pattern) || pattern.includes(colLower)) return true;
+              // Contains pattern key
+              if (colLower.includes(patternKey) || patternKey.includes(colLower)) return true;
+              // Any pattern in the list matches
+              return patterns.some(p => colLower.includes(p) || p.includes(colLower));
             });
             
-            if (matchingColumn) {
+            if (matchingColumn && !mapping[pdfField.name]) {
               mapping[pdfField.name] = matchingColumn;
+              matched = true;
               break;
             }
           }
+        }
+        if (matched) break;
+      }
+      
+      // If no pattern match, try direct column name matching
+      if (!matched) {
+        const directMatch = sheetColumns.find(col => {
+          const colLower = col.toLowerCase().trim();
+          const pdfLower = pdfFieldLower;
+          // Remove common separators and compare
+          const colNormalized = colLower.replace(/[_\s-]/g, '');
+          const pdfNormalized = pdfLower.replace(/[_\s-]/g, '');
+          
+          // Check if they're similar (one contains the other)
+          return colNormalized.includes(pdfNormalized) || 
+                 pdfNormalized.includes(colNormalized) ||
+                 colLower === pdfLower;
+        });
+        
+        if (directMatch && !mapping[pdfField.name]) {
+          mapping[pdfField.name] = directMatch;
         }
       }
     });
@@ -249,7 +294,8 @@ export default function Home() {
 
   // Auto-map when both PDF fields and spreadsheet columns are available
   useEffect(() => {
-    if (formFields.length > 0 && sheetColumns.length > 0 && Object.keys(fieldMapping).length === 0) {
+    if (formFields.length > 0 && sheetColumns.length > 0) {
+      // Always try to auto-map, even if some mappings exist (to catch new fields)
       autoMapFields();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -260,11 +306,11 @@ export default function Home() {
     if (selectedPerson && Object.keys(fieldMapping).length > 0 && pdfFile) {
       const timer = setTimeout(() => {
         generatePreview();
-      }, 300); // Debounce
+      }, 500); // Debounce to allow mapping to settle
       return () => clearTimeout(timer);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedPerson, Object.keys(fieldMapping).length]);
+  }, [selectedPerson, fieldMapping]);
 
   return (
     <div className="min-h-screen bg-blue-50">
@@ -508,39 +554,47 @@ export default function Home() {
           <div className="mb-6 bg-white rounded-lg shadow-sm border border-blue-200 p-6">
             <div className="flex justify-between items-center mb-4">
               <div>
-                <h2 className="text-lg font-semibold text-blue-900">3. Map Fields</h2>
+                <h2 className="text-lg font-semibold text-blue-900">3. Field Mapping</h2>
                 <p className="text-sm text-blue-700 mt-1">
-                  Fields are automatically mapped. Review and adjust as needed.
+                  {Object.keys(fieldMapping).filter(k => fieldMapping[k]).length} of {formFields.length} fields automatically mapped. Review and adjust as needed.
                 </p>
               </div>
               <button
                 onClick={autoMapFields}
                 className="px-3 py-1.5 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 text-sm font-medium transition-colors"
               >
-                Re-map Fields
+                Re-map All Fields
               </button>
             </div>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
-              {formFields.map((field) => (
-                <div key={field.name} className="border border-blue-200 rounded-md p-3">
-                  <label className="block text-xs font-medium text-blue-900 mb-1.5">
-                    {field.name}
-                  </label>
-                  <select
-                    value={fieldMapping[field.name] || ''}
-                    onChange={(e) => updateMapping(field.name, e.target.value)}
-                    className="w-full px-2 py-1.5 border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                  >
-                    <option value="">Skip field</option>
-                    {sheetColumns.map((col) => (
-                      <option key={col} value={col}>
-                        {col}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              ))}
+              {formFields.map((field) => {
+                const isMapped = fieldMapping[field.name] && fieldMapping[field.name].trim() !== '';
+                return (
+                  <div key={field.name} className={`border rounded-md p-3 ${isMapped ? 'border-blue-400 bg-blue-50' : 'border-blue-200'}`}>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label className="block text-xs font-medium text-blue-900">
+                        {field.name}
+                      </label>
+                      {isMapped && (
+                        <span className="text-xs text-blue-600 font-medium">Mapped</span>
+                      )}
+                    </div>
+                    <select
+                      value={fieldMapping[field.name] || ''}
+                      onChange={(e) => updateMapping(field.name, e.target.value)}
+                      className="w-full px-2 py-1.5 border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white"
+                    >
+                      <option value="">Skip field</option>
+                      {sheetColumns.map((col) => (
+                        <option key={col} value={col}>
+                          {col}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
@@ -575,22 +629,28 @@ export default function Home() {
           <div className="mb-6 bg-white rounded-lg shadow-sm border border-blue-200 p-6">
             <div className="mb-4">
               <h2 className="text-lg font-semibold text-blue-900 mb-2">Download Filled Form</h2>
-              <p className="text-sm text-blue-700">
+              <p className="text-sm text-blue-700 mb-2">
                 Ready to generate <span className="font-medium">{pdfFile?.name}</span> with data from <span className="font-medium">{(() => {
                   const firstColumnKey = Object.keys(selectedPerson)[0];
                   return selectedPerson[firstColumnKey] || selectedPerson.name || selectedPerson.Name || 'selected provider';
                 })()}</span>
               </p>
+              <p className="text-xs text-blue-600">
+                {Object.keys(fieldMapping).filter(k => fieldMapping[k]).length} of {formFields.length} fields will be automatically filled from the spreadsheet
+              </p>
             </div>
             <button
               onClick={handleFillPdf}
-              disabled={loading}
+              disabled={loading || Object.keys(fieldMapping).filter(k => fieldMapping[k]).length === 0}
               className="w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed transition-colors font-medium"
             >
               {loading ? 'Generating PDF...' : 'Download Filled PDF'}
             </button>
             {loading && (
               <p className="text-center text-xs text-blue-600 mt-2">Processing form data...</p>
+            )}
+            {Object.keys(fieldMapping).filter(k => fieldMapping[k]).length === 0 && !loading && (
+              <p className="text-center text-xs text-blue-600 mt-2">Please map at least one field to download</p>
             )}
           </div>
         )}
