@@ -3,6 +3,9 @@ import * as XLSX from 'xlsx';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     // Try to read the standard format CSV first (preferred)
