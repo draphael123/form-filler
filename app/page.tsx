@@ -91,7 +91,18 @@ export default function Home() {
         alert(data.error);
         return;
       }
-      setPeople(data.people);
+      // Additional safety filter for termed providers (in case any slip through)
+      const activePeople = data.people.filter((person: Person) => {
+        const name = getProviderName(person);
+        return !name.toLowerCase().includes('termed');
+      });
+      setPeople(activePeople);
+      
+      if (activePeople.length < data.people.length) {
+        const filteredCount = data.people.length - activePeople.length;
+        setNotification({ type: 'info', message: `Loaded ${activePeople.length} providers (${filteredCount} termed providers excluded)` });
+        setTimeout(() => setNotification(null), 4000);
+      }
     } catch (error) {
       console.error('Error fetching people:', error);
       alert('Error fetching Google Sheets data');
@@ -122,8 +133,19 @@ export default function Home() {
         alert(data.error);
         return;
       }
-      setPeople(data.people);
+      // Additional safety filter for termed providers (in case any slip through)
+      const activePeople = data.people.filter((person: Person) => {
+        const name = getProviderName(person);
+        return !name.toLowerCase().includes('termed');
+      });
+      setPeople(activePeople);
       setIsDefaultCSV(false); // Reset flag when manually uploading
+      
+      if (activePeople.length < data.people.length) {
+        const filteredCount = data.people.length - activePeople.length;
+        setNotification({ type: 'info', message: `Loaded ${activePeople.length} providers (${filteredCount} termed providers excluded)` });
+        setTimeout(() => setNotification(null), 4000);
+      }
     } catch (error) {
       console.error('Error parsing spreadsheet:', error);
       alert('Error parsing spreadsheet file');
@@ -136,8 +158,12 @@ export default function Home() {
   const loadDefaultCSV = async () => {
     const defaultCSV = getDefaultCSV();
     if (defaultCSV && defaultCSV.people && defaultCSV.people.length > 0) {
-      // Use the stored people data directly
-      setPeople(defaultCSV.people);
+      // Additional safety filter for termed providers (in case any slip through)
+      const activePeople = defaultCSV.people.filter((person: Person) => {
+        const name = getProviderName(person);
+        return !name.toLowerCase().includes('termed');
+      });
+      setPeople(activePeople);
       setIsDefaultCSV(true);
       
       // Also set the file reference if needed
@@ -146,8 +172,12 @@ export default function Home() {
         setSpreadsheetFile(file);
       }
       
-      setNotification({ type: 'info', message: `Loaded default data source: ${defaultCSV.fileName} (${defaultCSV.people.length} providers)` });
-      setTimeout(() => setNotification(null), 3000);
+      const filteredCount = defaultCSV.people.length - activePeople.length;
+      const message = filteredCount > 0
+        ? `Loaded default data source: ${defaultCSV.fileName} (${activePeople.length} active providers, ${filteredCount} termed excluded)`
+        : `Loaded default data source: ${defaultCSV.fileName} (${activePeople.length} providers)`;
+      setNotification({ type: 'info', message });
+      setTimeout(() => setNotification(null), 4000);
     } else {
       // If no default CSV is saved, try to load the provider compliance dashboard
       try {
@@ -155,7 +185,12 @@ export default function Home() {
         if (response.ok) {
           const data = await response.json();
           if (data.people && data.people.length > 0) {
-            setPeople(data.people);
+            // Additional safety filter for termed providers (in case any slip through)
+            const activePeople = data.people.filter((person: Person) => {
+              const name = getProviderName(person);
+              return !name.toLowerCase().includes('termed');
+            });
+            setPeople(activePeople);
             setIsDefaultCSV(true);
             
             // Create a file object from the base64 data
@@ -169,11 +204,15 @@ export default function Home() {
             const file = new File([blob], data.fileName, { type: 'text/csv' });
             setSpreadsheetFile(file);
             
-            // Automatically save it as the default
-            await saveDefaultCSV(file, data.people);
+            // Automatically save it as the default (save only active people)
+            await saveDefaultCSV(file, activePeople);
             
-            setNotification({ type: 'info', message: `Loaded Provider Compliance Dashboard: ${data.people.length} providers` });
-            setTimeout(() => setNotification(null), 3000);
+            const filteredCount = data.people.length - activePeople.length;
+            const message = filteredCount > 0 
+              ? `Loaded Provider Compliance Dashboard: ${activePeople.length} active providers (${filteredCount} termed excluded)`
+              : `Loaded Provider Compliance Dashboard: ${activePeople.length} providers`;
+            setNotification({ type: 'info', message });
+            setTimeout(() => setNotification(null), 4000);
           }
         }
       } catch (error) {
@@ -242,8 +281,7 @@ export default function Home() {
       a.href = url;
       
       // Use custom filename pattern
-      const firstColumnKey = Object.keys(selectedPerson)[0];
-      const providerName = selectedPerson[firstColumnKey] || selectedPerson.name || selectedPerson.Name || 'Provider';
+      const providerName = getProviderName(selectedPerson);
       const filename = downloadFilename
         .replace('{ProviderName}', providerName.replace(/[^a-z0-9]/gi, '_'))
         .replace('{FormName}', pdfFile.name.replace('.pdf', ''));
@@ -424,8 +462,7 @@ export default function Home() {
   const filteredPeople = people.filter((person, idx) => {
     if (!searchQuery) return true;
     const query = searchQuery.toLowerCase();
-    const firstColumnKey = Object.keys(person)[0];
-    const displayName = person[firstColumnKey] || person.name || person.Name || '';
+    const displayName = getProviderName(person);
     return displayName.toLowerCase().includes(query) ||
            Object.values(person).some(val => String(val).toLowerCase().includes(query));
   });
@@ -446,8 +483,7 @@ export default function Home() {
       
       for (const idx of selectedProviders) {
         const person = people[idx];
-        const firstColumnKey = Object.keys(person)[0];
-        const providerName = person[firstColumnKey] || person.name || person.Name || `Provider ${idx + 1}`;
+        const providerName = getProviderName(person) || `Provider ${idx + 1}`;
         
         const formData = new FormData();
         formData.append('pdf', pdfFile);
@@ -558,6 +594,19 @@ export default function Home() {
   };
 
   const sheetColumns = people.length > 0 ? Object.keys(people[0]) : [];
+
+  // Helper function to get provider name (full name from Name column)
+  const getProviderName = (person: Person): string => {
+    // Prioritize "Name" column (full name)
+    if (person.Name) return person.Name;
+    if (person.name) return person.name;
+    if (person['Provider Name']) return person['Provider Name'];
+    if (person['Full Name']) return person['Full Name'];
+    
+    // Fallback to first column if Name column doesn't exist
+    const firstColumnKey = Object.keys(person)[0];
+    return person[firstColumnKey] || 'Provider';
+  };
 
   // Auto-map when both PDF fields and spreadsheet columns are available
   useEffect(() => {
@@ -976,8 +1025,7 @@ export default function Home() {
                     <option value="">Select a provider</option>
                     {filteredPeople.map((person, filteredIdx) => {
                       const originalIdx = people.indexOf(person);
-                      const firstColumnKey = Object.keys(person)[0];
-                      const displayName = person[firstColumnKey] || person.name || person.Name || person['Fountain Email Address']?.split('@')[0] || `Provider ${originalIdx + 1}`;
+                      const displayName = getProviderName(person) || person['Fountain Email Address']?.split('@')[0] || `Provider ${originalIdx + 1}`;
                       return (
                         <option key={originalIdx} value={originalIdx}>
                           {displayName}
@@ -996,8 +1044,7 @@ export default function Home() {
                     <div className="space-y-1">
                       {filteredPeople.map((person, filteredIdx) => {
                         const originalIdx = people.indexOf(person);
-                        const firstColumnKey = Object.keys(person)[0];
-                        const displayName = person[firstColumnKey] || person.name || person.Name || person['Fountain Email Address']?.split('@')[0] || `Provider ${originalIdx + 1}`;
+                        const displayName = getProviderName(person) || person['Fountain Email Address']?.split('@')[0] || `Provider ${originalIdx + 1}`;
                         const isSelected = selectedProviders.includes(originalIdx);
                         
                         return (
@@ -1208,10 +1255,7 @@ export default function Home() {
               )}
             </div>
             <p className={`text-sm mb-4 ${darkMode ? 'text-blue-300' : 'text-blue-700'}`}>
-              Preview for <span className={`font-medium ${darkMode ? 'text-white' : 'text-blue-900'}`}>{(() => {
-                const firstColumnKey = Object.keys(selectedPerson)[0];
-                return selectedPerson[firstColumnKey] || selectedPerson.name || selectedPerson.Name || 'selected provider';
-              })()}</span>
+              Preview for <span className={`font-medium ${darkMode ? 'text-white' : 'text-blue-900'}`}>{getProviderName(selectedPerson)}</span>
             </p>
             <div className={`border rounded-md overflow-hidden ${darkMode ? 'border-slate-600 bg-slate-900' : 'border-blue-300 bg-blue-50'}`} style={{ height: '600px' }}>
               <iframe
@@ -1229,10 +1273,7 @@ export default function Home() {
             <div className="mb-4">
               <h2 className={`text-lg font-semibold mb-2 ${darkMode ? 'text-white' : 'text-blue-900'}`}>Download Filled Form</h2>
               <p className={`text-sm mb-2 ${darkMode ? 'text-blue-300' : 'text-blue-700'}`}>
-                Ready to generate <span className={`font-medium ${darkMode ? 'text-white' : 'text-blue-900'}`}>{pdfFile?.name}</span> with data from <span className={`font-medium ${darkMode ? 'text-white' : 'text-blue-900'}`}>{(() => {
-                  const firstColumnKey = Object.keys(selectedPerson)[0];
-                  return selectedPerson[firstColumnKey] || selectedPerson.name || selectedPerson.Name || 'selected provider';
-                })()}</span>
+                Ready to generate <span className={`font-medium ${darkMode ? 'text-white' : 'text-blue-900'}`}>{pdfFile?.name}</span> with data from <span className={`font-medium ${darkMode ? 'text-white' : 'text-blue-900'}`}>{getProviderName(selectedPerson)}</span>
               </p>
               <p className={`text-xs ${darkMode ? 'text-blue-400' : 'text-blue-600'}`}>
                 {Object.keys(fieldMapping).filter(k => fieldMapping[k]).length} of {formFields.length} fields will be automatically filled from the spreadsheet

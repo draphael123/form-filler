@@ -40,14 +40,21 @@ export async function GET(request: NextRequest) {
     // First row is headers
     const headers = rows[0];
     
-    // Convert rows to objects
-    const people = rows.slice(1).map(row => {
-      const person: Record<string, string> = {};
-      headers.forEach((header, index) => {
-        person[header] = row[index] || '';
+    // Convert rows to objects and filter out termed providers
+    const people = rows.slice(1)
+      .map(row => {
+        const person: Record<string, string> = {};
+        headers.forEach((header, index) => {
+          person[header] = row[index] || '';
+        });
+        return person;
+      })
+      .filter(person => {
+        // Filter out termed providers - check Name column for "termed"
+        const nameColumn = person.Name || person.name || person['Provider Name'] || person['Full Name'] || '';
+        const nameValue = String(nameColumn).toLowerCase();
+        return !nameValue.includes('termed');
       });
-      return person;
-    });
 
     return NextResponse.json({ people });
   } catch (error) {
