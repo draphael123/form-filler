@@ -16,10 +16,15 @@ export interface FilledFormHistory {
   mappings: Record<string, string>;
 }
 
+export interface Person {
+  [key: string]: string;
+}
+
 const STORAGE_KEYS = {
   MAPPINGS: 'pdf_filler_mappings',
   HISTORY: 'pdf_filler_history',
   SETTINGS: 'pdf_filler_settings',
+  DEFAULT_CSV: 'pdf_filler_default_csv',
 };
 
 // Save mapping template
@@ -136,5 +141,80 @@ export function importMappings(json: string): boolean {
     console.error('Error importing mappings:', error);
     return false;
   }
+}
+
+// Default CSV/Spreadsheet storage
+export interface DefaultCSV {
+  fileName: string;
+  fileData: string; // base64 encoded
+  people: Person[]; // Store parsed data
+  setAt: string;
+}
+
+// Save default CSV
+export async function saveDefaultCSV(file: File, people: Person[]): Promise<boolean> {
+  try {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64 = reader.result as string;
+        const defaultCSV: DefaultCSV = {
+          fileName: file.name,
+          fileData: base64,
+          people: people,
+          setAt: new Date().toISOString(),
+        };
+        localStorage.setItem(STORAGE_KEYS.DEFAULT_CSV, JSON.stringify(defaultCSV));
+        resolve(true);
+      };
+      reader.onerror = () => resolve(false);
+      reader.readAsDataURL(file);
+    });
+  } catch (error) {
+    console.error('Error saving default CSV:', error);
+    return false;
+  }
+}
+
+// Get default CSV
+export function getDefaultCSV(): DefaultCSV | null {
+  try {
+    const data = localStorage.getItem(STORAGE_KEYS.DEFAULT_CSV);
+    return data ? JSON.parse(data) : null;
+  } catch (error) {
+    console.error('Error loading default CSV:', error);
+    return null;
+  }
+}
+
+// Convert default CSV back to File object
+export function defaultCSVToFile(defaultCSV: DefaultCSV): File | null {
+  try {
+    // Extract base64 data (remove data: prefix)
+    const base64Data = defaultCSV.fileData.split(',')[1] || defaultCSV.fileData;
+    const byteCharacters = atob(base64Data);
+    const byteNumbers = new Array(byteCharacters.length);
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+    const byteArray = new Uint8Array(byteNumbers);
+    
+    // Determine MIME type based on file extension
+    const extension = defaultCSV.fileName.split('.').pop()?.toLowerCase();
+    const mimeType = extension === 'xlsx' || extension === 'xls' 
+      ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      : 'text/csv';
+    
+    const blob = new Blob([byteArray], { type: mimeType });
+    return new File([blob], defaultCSV.fileName, { type: mimeType });
+  } catch (error) {
+    console.error('Error converting default CSV to file:', error);
+    return null;
+  }
+}
+
+// Clear default CSV
+export function clearDefaultCSV(): void {
+  localStorage.removeItem(STORAGE_KEYS.DEFAULT_CSV);
 }
 

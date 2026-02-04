@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { saveMappingTemplate, getMappingForPDF, saveToHistory, getHistory, exportMappings, importMappings } from './utils/storage';
+import { saveMappingTemplate, getMappingForPDF, saveToHistory, getHistory, exportMappings, importMappings, saveDefaultCSV, getDefaultCSV, defaultCSVToFile, clearDefaultCSV, Person } from './utils/storage';
 import { autoFormat } from './utils/formatting';
 import { validateField } from './utils/validation';
 
@@ -11,9 +11,6 @@ interface FormField {
   value?: string;
 }
 
-interface Person {
-  [key: string]: string;
-}
 
 export default function Home() {
   const [pdfFile, setPdfFile] = useState<File | null>(null);
@@ -38,6 +35,7 @@ export default function Home() {
   const [showHistory, setShowHistory] = useState(false);
   const [notification, setNotification] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
   const [downloadFilename, setDownloadFilename] = useState('{ProviderName}_{FormName}');
+  const [isDefaultCSV, setIsDefaultCSV] = useState(false);
 
   // Extract fields from uploaded PDF
   const handlePdfUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -125,12 +123,93 @@ export default function Home() {
         return;
       }
       setPeople(data.people);
+      setIsDefaultCSV(false); // Reset flag when manually uploading
     } catch (error) {
       console.error('Error parsing spreadsheet:', error);
       alert('Error parsing spreadsheet file');
     } finally {
       setLoading(false);
     }
+  };
+
+  // Load default CSV on page load
+  const loadDefaultCSV = async () => {
+    const defaultCSV = getDefaultCSV();
+    if (defaultCSV && defaultCSV.people && defaultCSV.people.length > 0) {
+      // Use the stored people data directly
+      setPeople(defaultCSV.people);
+      setIsDefaultCSV(true);
+      
+      // Also set the file reference if needed
+      const file = defaultCSVToFile(defaultCSV);
+      if (file) {
+        setSpreadsheetFile(file);
+      }
+      
+      setNotification({ type: 'info', message: `Loaded default data source: ${defaultCSV.fileName} (${defaultCSV.people.length} providers)` });
+      setTimeout(() => setNotification(null), 3000);
+    } else {
+      // If no default CSV is saved, try to load the provider compliance dashboard
+      try {
+        const response = await fetch('/api/load-default-csv');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.people && data.people.length > 0) {
+            setPeople(data.people);
+            setIsDefaultCSV(true);
+            
+            // Create a file object from the base64 data
+            const byteCharacters = atob(data.fileContent);
+            const byteNumbers = new Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) {
+              byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            const blob = new Blob([byteArray], { type: 'text/csv' });
+            const file = new File([blob], data.fileName, { type: 'text/csv' });
+            setSpreadsheetFile(file);
+            
+            // Automatically save it as the default
+            await saveDefaultCSV(file, data.people);
+            
+            setNotification({ type: 'info', message: `Loaded Provider Compliance Dashboard: ${data.people.length} providers` });
+            setTimeout(() => setNotification(null), 3000);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading default CSV:', error);
+        // Silently fail - user can still upload manually
+      }
+    }
+  };
+
+  // Set current CSV as default
+  const handleSetCSVAsDefault = async () => {
+    if (!spreadsheetFile || people.length === 0) {
+      setNotification({ type: 'error', message: 'Please upload a spreadsheet with data first' });
+      setTimeout(() => setNotification(null), 3000);
+      return;
+    }
+
+    const success = await saveDefaultCSV(spreadsheetFile, people);
+    if (success) {
+      setIsDefaultCSV(true);
+      setNotification({ type: 'success', message: `"${spreadsheetFile.name}" set as default data source` });
+      setTimeout(() => setNotification(null), 3000);
+    } else {
+      setNotification({ type: 'error', message: 'Failed to save default CSV' });
+      setTimeout(() => setNotification(null), 3000);
+    }
+  };
+
+  // Clear default CSV
+  const handleClearDefaultCSV = () => {
+    clearDefaultCSV();
+    setIsDefaultCSV(false);
+    setPeople([]);
+    setSpreadsheetFile(null);
+    setNotification({ type: 'success', message: 'Default data source cleared' });
+    setTimeout(() => setNotification(null), 3000);
   };
 
   // Fill PDF with selected person's data
@@ -459,6 +538,12 @@ export default function Home() {
       document.documentElement.classList.add('dark');
     }
   }, []);
+
+  // Load default CSV on page load
+  useEffect(() => {
+    loadDefaultCSV();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   
   // Toggle dark mode
   const toggleDarkMode = () => {
@@ -687,7 +772,13 @@ export default function Home() {
             {/* Data Source Toggle */}
             <div className="mb-4 flex gap-2">
               <button
-                onClick={() => setDataSource('file')}
+                onClick={() => {
+                  setDataSource('file');
+                  // Reload default CSV if switching back to file source
+                  if (isDefaultCSV) {
+                    loadDefaultCSV();
+                  }
+                }}
                 className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
                   dataSource === 'file'
                     ? 'bg-blue-600 text-white'
@@ -699,7 +790,10 @@ export default function Home() {
                 Upload File
               </button>
               <button
-                onClick={() => setDataSource('google')}
+                onClick={() => {
+                  setDataSource('google');
+                  setIsDefaultCSV(false); // Clear default flag when switching to Google Sheets
+                }}
                 className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
                   dataSource === 'google'
                     ? 'bg-blue-600 text-white'
@@ -715,9 +809,16 @@ export default function Home() {
             {/* File Upload Option */}
             {dataSource === 'file' && (
               <div>
-                <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-white' : 'text-blue-900'}`}>
-                  Upload Provider Compliance Dashboard
-                </label>
+                <div className="flex justify-between items-center mb-2">
+                  <label className={`block text-sm font-medium ${darkMode ? 'text-white' : 'text-blue-900'}`}>
+                    Upload Provider Compliance Dashboard
+                  </label>
+                  {isDefaultCSV && (
+                    <span className={`text-xs px-2 py-1 rounded ${darkMode ? 'bg-blue-700 text-blue-200' : 'bg-blue-100 text-blue-700'}`}>
+                      ✓ Default
+                    </span>
+                  )}
+                </div>
                 <input
                   type="file"
                   accept=".csv,.xlsx,.xls"
@@ -731,16 +832,42 @@ export default function Home() {
                 <p className={`text-xs mt-2 mb-4 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`}>
                   Column 1 will be used as the provider identifier
                 </p>
-                {spreadsheetFile && (
+                {(spreadsheetFile || isDefaultCSV) && (
                   <div className={`p-3 rounded-md border mb-4 ${
                     darkMode ? 'bg-slate-700 border-slate-600' : 'bg-blue-50 border-blue-200'
                   }`}>
-                    <p className={`text-sm font-medium ${darkMode ? 'text-white' : 'text-blue-900'}`}>{spreadsheetFile.name}</p>
-                    {people.length > 0 && (
-                      <p className={`text-xs mt-1 ${darkMode ? 'text-blue-300' : 'text-blue-700'}`}>
-                        {people.length} {people.length === 1 ? 'provider' : 'providers'} loaded
-                      </p>
-                    )}
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className={`text-sm font-medium ${darkMode ? 'text-white' : 'text-blue-900'}`}>
+                          {spreadsheetFile?.name || getDefaultCSV()?.fileName || 'Default data source'}
+                        </p>
+                        {people.length > 0 && (
+                          <p className={`text-xs mt-1 ${darkMode ? 'text-blue-300' : 'text-blue-700'}`}>
+                            {people.length} {people.length === 1 ? 'provider' : 'providers'} loaded
+                          </p>
+                        )}
+                      </div>
+                      <div className="flex gap-2">
+                        {!isDefaultCSV && spreadsheetFile && people.length > 0 && (
+                          <button
+                            onClick={handleSetCSVAsDefault}
+                            className={`text-xs px-2 py-1 rounded ${darkMode ? 'bg-blue-700 text-white hover:bg-blue-600' : 'bg-blue-100 text-blue-700 hover:bg-blue-200'}`}
+                            title="Set as default data source"
+                          >
+                            Set as Default
+                          </button>
+                        )}
+                        {isDefaultCSV && (
+                          <button
+                            onClick={handleClearDefaultCSV}
+                            className={`text-xs px-2 py-1 rounded ${darkMode ? 'bg-red-700 text-white hover:bg-red-600' : 'bg-red-100 text-red-700 hover:bg-red-200'}`}
+                            title="Clear default data source"
+                          >
+                            Clear Default
+                          </button>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
